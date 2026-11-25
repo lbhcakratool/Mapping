@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grouping WP per Alamat – Pemasangan &amp; Maintenance</title>
+<style>
+:root{--bg:#eef2f7;--card:#fff;--ink:#0f172a;--muted:#64748b;--line:#dbe3ee;--accent:#1e5fa8;--soft:#eef4fb;--ok:#0f766e;--danger:#b91c1c;--font:"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 var(--font)}
+[hidden]{display:none!important}
+.bar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bar strong{font-size:13px;color:#1f3a5f}
+.sp{flex:1}
+.wrap{max-width:1200px;margin:0 auto;padding:14px 14px 60px}
+button{font:inherit;font-size:13px;padding:8px 12px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+button:hover{border-color:#b9c8dd;background:#f8fbff}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{background:#1a5292}
+button.ghost{background:transparent}
+button.danger{color:var(--danger);border-color:#f3c4c4}
+button.sm{padding:4px 9px;font-size:12px}
+.seg{position:relative;display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.seg label{padding:8px 14px;cursor:pointer;font-size:13px;color:var(--muted);white-space:nowrap}
+.seg label+label{border-left:1px solid var(--line)}
+.seg input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.seg label:has(input:checked){background:var(--accent);color:#fff;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:14px}
+.kop{border-left:5px solid var(--accent)}
+.eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.kop h1{font-size:20px;margin:4px 0 8px;color:#12335c}
+.meta{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-size:12.5px;color:var(--muted)}
+.meta input[type=text],.meta input[type=date]{border:none;border-bottom:1px dashed #b9c8dd;background:transparent;font:600 13px var(--font);color:#12335c;padding:3px 4px;min-width:170px}
+h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#1f3a5f;margin:0 0 10px}
+.sec{display:none}
+.sec.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:10px 0}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.fld input,.fld textarea,.fld select,.mbox input,.mbox textarea,.tarea{border:1px solid var(--line);border-radius:9px;padding:8px 10px;font:600 14px var(--font);color:var(--ink);background:#fcfdff;width:100%}
+.fld input:focus,.fld textarea:focus,.mbox input:focus,.mbox textarea:focus,.tarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px #e8f1fb}
+.plan[data-m=tim] [data-mode=hari],.plan[data-m=hari] [data-mode=tim]{display:none}
+.plan .seg{margin-bottom:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:10px 0 4px}
+.chip{font-size:12.5px;padding:6px 11px;border-radius:99px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer}
+.chip:hover{background:#f8fbff;border-color:#b9c8dd}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.chip b{font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0}
+.stat{border:1px solid var(--line);border-radius:11px;padding:9px 12px;background:#fbfdff}
+.stat.hl{background:var(--soft);border-color:#d7e6f7}
+.stat .l{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-size:19px;font-weight:700}
+.stat .v small{font-size:11.5px;color:var(--muted);font-weight:600}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.toolbar input,.toolbar select{border:1px solid var(--line);border-radius:9px;padding:8px 10px;font:inherit;font-size:13px;background:#fff}
+.toolbar input{flex:1;min-width:200px}
+.grp{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.gh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:10px 12px;background:#f4f8fd;border-bottom:1px solid var(--line)}
+.gaddr{font-weight:600;color:#12335c}
+.gmeta{font-size:12px;color:var(--muted);margin-top:2px}
+.ghright{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.gh select{font-size:12px;padding:4px 6px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);max-width:160px}
+.pill{font-size:12px;font-weight:700;background:var(--soft);color:var(--accent);border-radius:99px;padding:3px 10px;white-space:nowrap}
+.pill.ok{background:#e6f5f3;color:var(--ok)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:760px}
+th,td{padding:6px 8px;border-bottom:1px solid #edf1f7;text-align:left;vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#1f3a5f;background:#fbfdff}
+td.c,th.c{text-align:center;width:56px}
+td.num,th.num{text-align:right}
+tr.dn td{color:var(--muted)}
+.addrs{font-size:12.5px;line-height:1.45}
+.addrs .ad{padding:6px 0;border-bottom:1px dashed #e3eaf3}
+.addrs .ad:last-child{border-bottom:none}
+.addrs .adh{display:flex;gap:8px;justify-content:space-between}
+.addrs .n{color:var(--muted);white-space:nowrap}
+.wpl{margin:3px 0 0 16px;padding:0;color:var(--ink);font-size:12.5px}
+.wpl li{margin:1px 0}
+.dv{color:#94a3b8;margin-left:6px;font-size:11.5px}
+.empty{padding:20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50}
+.mbox{background:#fff;border-radius:14px;padding:18px;width:min(560px,100%);max-height:92vh;overflow:auto}
+.mbox h3{margin:0 0 12px;font-size:16px}
+.mgrid{display:grid;gap:10px}
+.mact{display:flex;gap:8px;margin-top:14px;align-items:center;flex-wrap:wrap}
+.hint{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+.msg{font-size:13px;background:var(--soft);border:1px solid #d7e6f7;border-radius:9px;padding:9px 12px;margin-top:10px;white-space:pre-line}
+.msg.err{background:#fff1f1;border-color:#f3c4c4;color:var(--danger)}
+.foot{font-size:11.5px;color:var(--muted);text-align:center;margin-top:16px}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  body{background:#fff;font-size:10.5px}
+  .no-print,.bar,.modal{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .card{border:1px solid #cbd5e1;box-shadow:none;margin-top:8px;padding:8px 10px}
+  .sec:not(.active){display:none!important}
+  .sec.active{display:block}
+  .meta input{border:none;min-width:0}
+  table{font-size:9.5px;min-width:0}
+  th,td{padding:3px 5px}
+  .grp{break-inside:avoid}
+  .foot{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="bar no-print">
+  <strong>Grouping WP</strong>
+  <span class="sp"></span>
+  <div class="seg">
+    <label><input type="radio" name="view" value="pemasangan"> Pemasangan</label>
+    <label><input type="radio" name="view" value="maintenance"> Maintenance</label>
+  </div>
+  <button id="btnAdd">+ Tambah WP</button>
+  <button id="btnTpl">Template Excel</button>
+  <button id="btnImport">Import Excel</button>
+  <button id="btnCsv" class="ghost">Ekspor CSV</button>
+  <button id="btnXlsx" class="primary">Download Excel</button>
+  <button id="btnReset" class="danger">Reset (kosongkan)</button>
+  <button id="btnSave">Save as HTML</button>
+  <button id="btnPrint" class="primary">Cetak / Simpan PDF</button>
+</div>
+
+<div class="wrap">
+  <section class="card kop">
+    <div class="eyebrow">Klasifikasi WP · Pemasangan &amp; Maintenance POSQU</div>
+    <h1>Daftar WP per Alamat</h1>
+    <div class="meta">
+      <label>Wilayah: <input type="text" data-g="wilayah" id="wilayah" placeholder="Isi wilayah, mis. Kabupaten Bandung"></label>
+      <label>Tanggal mulai: <input type="date" data-g="tanggal" id="tanggal"></label>
+      <label><input type="checkbox" data-g="skip" id="skip"> Lewati Sabtu/Minggu</label>
+    </div>
+  </section>
+
+  <div id="secs"><section class="card sec" data-sec="pemasangan">
+      <h2>Klasifikasi Pemasangan</h2>
+      <div class="plan no-print" id="plan-pemasangan" data-m="tim">
+        <div class="seg">
+          <label><input type="radio" name="mode-pemasangan" value="tim" data-sec="pemasangan" data-f="mode"> Dari jumlah tim → hitung hari</label>
+          <label><input type="radio" name="mode-pemasangan" value="hari" data-sec="pemasangan" data-f="mode"> Dari target hari → hitung tim</label>
+        </div>
+        <div class="grid">
+          <label class="fld">Kapasitas WP per tim per hari<input type="number" min="1" data-sec="pemasangan" data-f="cap"></label>
+          <label class="fld" data-mode="hari">Target jumlah hari kerja<input type="number" min="1" data-sec="pemasangan" data-f="hari"></label>
+        </div>
+      </div>
+      <div class="chips no-print" id="ch-pemasangan"><button class="chip on" data-act="team" data-m="pemasangan" data-team="all">Semua tim <b>0</b></button><button class="chip " data-act="team" data-m="pemasangan" data-team="Tim 1">Tim 1 <b>0</b></button><button class="chip " data-act="team" data-m="pemasangan" data-team="Tim 2">Tim 2 <b>0</b></button><button class="chip " data-act="team" data-m="pemasangan" data-team="Tim 3">Tim 3 <b>0</b></button><button class="chip " data-act="team" data-m="pemasangan" data-team="__un">Belum dibagi <b>0</b></button><span class="sp"></span><button class="sm" data-act="editteam" data-m="pemasangan">Atur Tim</button><button class="sm" data-act="autoassign" data-m="pemasangan">Bagi otomatis</button></div>
+      <div class="stats" id="st-pemasangan"><div class="stat"><div class="l">Total WP</div><div class="v">0 <small>WP</small></div></div><div class="stat"><div class="l">Alamat unik</div><div class="v">0 <small>alamat</small></div></div><div class="stat"><div class="l">Selesai</div><div class="v">0 <small>WP</small></div></div><div class="stat"><div class="l">Belum selesai</div><div class="v">0 <small>WP</small></div></div><div class="stat"><div class="l">Jumlah tim</div><div class="v">3 <small>tim</small></div></div><div class="stat"><div class="l">Kapasitas / tim / hari</div><div class="v">3 <small>WP</small></div></div><div class="stat hl"><div class="l">Hari kerja (tim tersibuk)</div><div class="v">0 <small>hari</small></div></div><div class="stat hl"><div class="l">Tim dibutuhkan</div><div class="v">3 <small>tim</small></div></div></div>
+      <div class="toolbar no-print">
+        <input type="search" placeholder="Cari nama, alamat, device, alat, metode…" data-sec="pemasangan" data-ui="q">
+        <select data-sec="pemasangan" data-ui="filter"><option value="all">Semua WP</option><option value="todo">Belum selesai</option><option value="done">Selesai</option></select>
+        <select data-sec="pemasangan" data-ui="sort"><option value="alamat">Urutkan: urutan data</option><option value="banyak">Urutkan: WP terbanyak</option></select>
+      </div>
+      <div id="grp-pemasangan"><div class="empty">Belum ada WP. Tambahkan lewat tombol Tambah WP atau Import Excel.</div></div>
+      <h2 style="margin-top:14px">Rekap per tim</h2>
+      <div id="rec-pemasangan"><div class="tw"><table>
+      <thead><tr><th>Tim</th><th class="num">Alamat</th><th class="num">WP</th><th class="num">Selesai</th><th class="num">Belum</th><th class="num">Hari</th><th>Perkiraan tanggal</th></tr></thead>
+      <tbody><tr>
+        <td><b>Semua tim</b></td><td class="num">0</td><td class="num">0</td>
+        <td class="num">0</td><td class="num">0</td><td class="num">0</td>
+        <td>—</td>
+      </tr></tbody></table></div></div>
+      <h2 style="margin-top:14px">Target tempat &amp; jadwal per hari</h2>
+      <div id="sch-pemasangan"><div class="empty">Belum ada target tempat.</div></div>
+    </section><section class="card sec active" data-sec="maintenance">
+      <h2>Klasifikasi Maintenance</h2>
+      <div class="plan no-print" id="plan-maintenance" data-m="tim">
+        <div class="seg">
+          <label><input type="radio" name="mode-maintenance" value="tim" data-sec="maintenance" data-f="mode"> Dari jumlah tim → hitung hari</label>
+          <label><input type="radio" name="mode-maintenance" value="hari" data-sec="maintenance" data-f="mode"> Dari target hari → hitung tim</label>
+        </div>
+        <div class="grid">
+          <label class="fld">Kapasitas WP per tim per hari<input type="number" min="1" data-sec="maintenance" data-f="cap"></label>
+          <label class="fld" data-mode="hari">Target jumlah hari kerja<input type="number" min="1" data-sec="maintenance" data-f="hari"></label>
+        </div>
+      </div>
+      <div class="chips no-print" id="ch-maintenance"><button class="chip on" data-act="team" data-m="maintenance" data-team="all">Semua tim <b>0</b></button><button class="chip " data-act="team" data-m="maintenance" data-team="Tim 1">Tim 1 <b>0</b></button><button class="chip " data-act="team" data-m="maintenance" data-team="Tim 2">Tim 2 <b>0</b></button><button class="chip " data-act="team" data-m="maintenance" data-team="__un">Belum dibagi <b>0</b></button><span class="sp"></span><button class="sm" data-act="editteam" data-m="maintenance">Atur Tim</button><button class="sm" data-act="autoassign" data-m="maintenance">Bagi otomatis</button></div>
+      <div class="stats" id="st-maintenance"><div class="stat"><div class="l">Total WP</div><div class="v">0 <small>WP</small></div></div><div class="stat"><div class="l">Alamat unik</div><div class="v">0 <small>alamat</small></div></div><div class="stat"><div class="l">Selesai</div><div class="v">0 <small>WP</small></div></div><div class="stat"><div class="l">Belum selesai</div><div class="v">0 <small>WP</small></div></div><div class="stat"><div class="l">Jumlah tim</div><div class="v">2 <small>tim</small></div></div><div class="stat"><div class="l">Kapasitas / tim / hari</div><div class="v">5 <small>WP</small></div></div><div class="stat hl"><div class="l">Hari kerja (tim tersibuk)</div><div class="v">0 <small>hari</small></div></div><div class="stat hl"><div class="l">Tim dibutuhkan</div><div class="v">2 <small>tim</small></div></div></div>
+      <div class="toolbar no-print">
+        <input type="search" placeholder="Cari nama, alamat, device, alat, metode…" data-sec="maintenance" data-ui="q">
+        <select data-sec="maintenance" data-ui="filter"><option value="all">Semua WP</option><option value="todo">Belum selesai</option><option value="done">Selesai</option></select>
+        <select data-sec="maintenance" data-ui="sort"><option value="alamat">Urutkan: urutan data</option><option value="banyak">Urutkan: WP terbanyak</option></select>
+      </div>
+      <div id="grp-maintenance"><div class="empty">Belum ada WP. Tambahkan lewat tombol Tambah WP atau Import Excel.</div></div>
+      <h2 style="margin-top:14px">Rekap per tim</h2>
+      <div id="rec-maintenance"><div class="tw"><table>
+      <thead><tr><th>Tim</th><th class="num">Alamat</th><th class="num">WP</th><th class="num">Selesai</th><th class="num">Belum</th><th class="num">Hari</th><th>Perkiraan tanggal</th></tr></thead>
+      <tbody><tr>
+        <td><b>Semua tim</b></td><td class="num">0</td><td class="num">0</td>
+        <td class="num">0</td><td class="num">0</td><td class="num">0</td>
+        <td>—</td>
+      </tr></tbody></table></div></div>
+      <h2 style="margin-top:14px">Target tempat &amp; jadwal per hari</h2>
+      <div id="sch-maintenance"><div class="empty">Belum ada target tempat.</div></div>
+    </section></div>
+
+  <p class="foot">Pilih tim untuk tiap alamat, lalu lihat target tempat dan jadwal per tim. Klik Save as HTML untuk menyimpan pembagian tim dan centang ke file baru.</p>
+</div>
+
+<div class="modal no-print" id="modal" hidden="">
+  <div class="mbox">
+    <h3 id="mtitle">Edit WP</h3>
+    <div class="mgrid">
+      <label class="fld">Nama WP<input id="fNama"></label>
+      <label class="fld">Jenis WP<input id="fJenis" placeholder="Restoran / Hotel / Parkir / Hiburan"></label>
+      <label class="fld">Alamat<textarea id="fAlamat" rows="2"></textarea></label>
+      <label class="fld">Device ID<input id="fDevice"></label>
+      <label class="fld">Jenis Alat<input id="fAlat"></label>
+      <label class="fld">Metode Tapping<input id="fMetode"></label>
+    </div>
+    <div class="mact">
+      <button id="mdel" class="danger">Hapus</button>
+      <span class="sp"></span>
+      <button id="mcancel">Batal</button>
+      <button id="msave" class="primary">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal no-print" id="tmodal" hidden="">
+  <div class="mbox">
+    <h3>Atur Tim</h3>
+    <p class="hint">Satu nama tim per baris. Contoh: Tim 1, Tim 2, Tim 3. Daftar ini dipakai untuk pembagian target alamat.</p>
+    <textarea id="tlist" class="tarea" rows="6"></textarea>
+    <div class="mact">
+      <span class="sp"></span>
+      <button id="tcancel">Batal</button>
+      <button id="tsave" class="primary">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal no-print" id="imodal" hidden="">
+  <div class="mbox">
+    <h3>Import Excel</h3>
+    <p class="hint">Pakai file dari tombol Template Excel. Kolom wajib: Nama WP dan Alamat. Kolom Tim (opsional) langsung membagi alamat ke tim. Baris yang tidak lengkap dilewati.</p>
+    <label class="fld">File Excel (.xlsx, .xls, .csv)<input type="file" id="ifile" accept=".xlsx,.xls,.csv"></label>
+    <div class="seg" style="margin-top:12px">
+      <label><input type="radio" name="imode" value="add" checked=""> Tambah ke data yang ada</label>
+      <label><input type="radio" name="imode" value="replace"> Ganti semua data</label>
+    </div>
+    <div class="msg" id="imsg">Sheet "Rekap Pemasangan": 31 WP siap diimport.</div>
+    <div class="mact">
+      <span class="sp"></span>
+      <button id="icancel">Batal</button>
+      <button id="iok" class="primary">Import</button>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="store">{"wilayah":"","tanggal":"2026-12-01","skip":true,"view":"maintenance","plan":{"pemasangan":{"mode":"tim","cap":3,"hari":12,"teams":["Tim 1","Tim 2","Tim 3"]},"maintenance":{"mode":"tim","cap":5,"hari":15,"teams":["Tim 1","Tim 2"]}},"assign":{"pemasangan":{},"maintenance":{}},"rows":[]}</script>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const keyOf = a => String(a || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const norm = s => String(s ?? '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const slug = s => String(s || 'wilayah').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const MODES = ['pemasangan', 'maintenance'];
+  const TITLES = { pemasangan: 'Klasifikasi Pemasangan', maintenance: 'Klasifikasi Maintenance' };
+  const UN = '__un';
+
+  const store = JSON.parse(document.getElementById('store').textContent);
+  const base = { mode:'tim', cap:3, hari:12, teams:['Tim 1','Tim 2','Tim 3'] };
+  let S = {
+    wilayah: store.wilayah, tanggal: store.tanggal, skip: store.skip, view: store.view || 'pemasangan',
+    plan: {
+      pemasangan: Object.assign({}, base, (store.plan || {}).pemasangan || {}),
+      maintenance: Object.assign({}, base, (store.plan || {}).maintenance || {})
+    },
+    assign: {
+      pemasangan: ((store.assign || {}).pemasangan) || {},
+      maintenance: ((store.assign || {}).maintenance) || {}
+    },
+    ui: {
+      pemasangan: { q:'', filter:'all', sort:'alamat', team:'all' },
+      maintenance: { q:'', filter:'all', sort:'alamat', team:'all' }
+    },
+    wp: (store.rows || []).map(r => ({ nama:r[0], jenis:r[1], alamat:r[2], device:r[3], alat:r[4], metode:r[5], dP:!!r[6], dM:!!r[7] }))
+  };
+  MODES.forEach(m => { if (!Array.isArray(S.plan[m].teams)) S.plan[m].teams = []; });
+
+  const isDone = (w, m) => m === 'pemasangan' ? w.dP : w.dM;
+  const setDone = (w, m, v) => { if (m === 'pemasangan') w.dP = v; else w.dM = v; };
+  const teams = m => S.plan[m].teams;
+
+  function allGroups(){
+    const gm = new Map();
+    S.wp.forEach((w, i) => {
+      const k = keyOf(w.alamat);
+      if (!gm.has(k)) gm.set(k, { key:k, alamat:w.alamat, items:[] });
+      gm.get(k).items.push({ w, i });
+    });
+    return [...gm.values()];
+  }
+
+  function pack(groups, cap){
+    const out = []; let cur = [], n = 0;
+    groups.forEach(g => {
+      const s = g.items.length;
+      if (n > 0 && n + s > cap) { out.push(cur); cur = []; n = 0; }
+      cur.push(g); n += s;
+    });
+    if (cur.length) out.push(cur);
+    return out;
+  }
+
+  function dates(count){
+    const out = [];
+    if (!S.tanggal) return out;
+    const d = new Date(S.tanggal + 'T00:00:00');
+    if (isNaN(d)) return out;
+    while (out.length < count) {
+      const w = d.getDay();
+      if (!S.skip || (w !== 0 && w !== 6)) out.push({
+        long: d.toLocaleDateString('id-ID', {weekday:'short', day:'2-digit', month:'short', year:'numeric'}),
+        short: d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'})
+      });
+      d.setDate(d.getDate() + 1);
+    }
+    return out;
+  }
+
+  function teamBuckets(m){
+    const names = teams(m), map = new Map(), list = [];
+    names.forEach(n => { const b = { name:n, groups:[] }; map.set(n, b); list.push(b); });
+    const un = { name:'Belum dibagi', groups:[], un:true };
+    allGroups().forEach(g => {
+      const t = S.assign[m][g.key];
+      const b = map.get(t);
+      (b || un).groups.push(g);
+    });
+    return { list, un, names };
+  }
+
+  function scheduleFor(m){
+    const p = S.plan[m];
+    const capTeam = Math.max(1, Number(p.cap) || 1);
+    const names = teams(m);
+    const anyAssign = Object.keys(S.assign[m]).length > 0;
+    let buckets;
+    if (!anyAssign) {
+      buckets = [{ name:'Semua tim', groups: allGroups(), cap: capTeam * Math.max(1, names.length) }];
+    } else {
+      const { list, un } = teamBuckets(m);
+      buckets = list.map(b => ({ name:b.name, groups:b.groups, cap:capTeam }));
+      if (un.groups.length) buckets.push({ name:un.name, groups:un.groups, cap:capTeam });
+    }
+    return buckets.map(b => {
+      const pend = b.groups.map(g => ({ ...g, items: g.items.filter(({w}) => !isDone(w, m)) })).filter(g => g.items.length);
+      const dayList = pack(pend, b.cap);
+      return {
+        name: b.name,
+        dayList,
+        ds: dates(dayList.length),
+        alamat: b.groups.length,
+        total: b.groups.reduce((a, g) => a + g.items.length, 0),
+        doneN: b.groups.reduce((a, g) => a + g.items.filter(({w}) => isDone(w, m)).length, 0),
+        pendN: pend.reduce((a, g) => a + g.items.length, 0),
+        cap: b.cap
+      };
+    });
+  }
+
+  const stat = (l, v, u, hl) => `<div class="stat${hl ? ' hl' : ''}"><div class="l">${l}</div><div class="v">${v} <small>${u}</small></div></div>`;
+
+  function renderSec(m){
+    const p = S.plan[m], u = S.ui[m], names = teams(m);
+    const capTeam = Math.max(1, Number(p.cap) || 1);
+    const planEl = $('#plan-' + m);
+    if (planEl) planEl.dataset.m = p.mode;
+    if (u.team !== 'all' && u.team !== UN && !names.includes(u.team)) u.team = 'all';
+
+    const allG = allGroups();
+    const doneN = S.wp.filter(w => isDone(w, m)).length;
+    const pendN = S.wp.length - doneN;
+    const sched = scheduleFor(m);
+    const maxDays = sched.reduce((a, b) => Math.max(a, b.dayList.length), 0);
+    const need = p.mode === 'hari'
+      ? Math.max(1, Math.ceil(Math.ceil(pendN / Math.max(1, Number(p.hari) || 1)) / capTeam))
+      : Math.max(1, names.length);
+
+    const dayOf = new Map();
+    sched.forEach(b => b.dayList.forEach((gs, i) => gs.forEach(g => dayOf.set(g.key, { day: i + 1, team: b.name }))));
+
+    $('#st-' + m).innerHTML =
+      stat('Total WP', S.wp.length, 'WP') +
+      stat('Alamat unik', allG.length, 'alamat') +
+      stat('Selesai', doneN, 'WP') +
+      stat('Belum selesai', pendN, 'WP') +
+      stat('Jumlah tim', names.length, 'tim') +
+      stat('Kapasitas / tim / hari', capTeam, 'WP') +
+      stat('Hari kerja (tim tersibuk)', maxDays, 'hari', 1) +
+      stat('Tim dibutuhkan', need, 'tim', 1);
+
+    const cnt = t => allG.filter(g => S.assign[m][g.key] === t).length;
+    const unCnt = allG.filter(g => !names.includes(S.assign[m][g.key])).length;
+    $('#ch-' + m).innerHTML =
+      `<button class="chip ${u.team === 'all' ? 'on' : ''}" data-act="team" data-m="${m}" data-team="all">Semua tim <b>${allG.length}</b></button>` +
+      names.map(n => `<button class="chip ${u.team === n ? 'on' : ''}" data-act="team" data-m="${m}" data-team="${esc(n)}">${esc(n)} <b>${cnt(n)}</b></button>`).join('') +
+      `<button class="chip ${u.team === UN ? 'on' : ''}" data-act="team" data-m="${m}" data-team="${UN}">Belum dibagi <b>${unCnt}</b></button>` +
+      `<span class="sp"></span>` +
+      `<button class="sm" data-act="editteam" data-m="${m}">Atur Tim</button>` +
+      `<button class="sm" data-act="autoassign" data-m="${m}">Bagi otomatis</button>`;
+
+    const q = (u.q || '').toLowerCase().trim();
+    let list = allG.map(g => ({ ...g, items: g.items.filter(({w}) => {
+      if (u.filter === 'done' && !isDone(w, m)) return false;
+      if (u.filter === 'todo' && isDone(w, m)) return false;
+      if (q && !(`${w.nama} ${w.jenis} ${w.alamat} ${w.device} ${w.alat} ${w.metode}`).toLowerCase().includes(q)) return false;
+      return true;
+    }) })).filter(g => g.items.length);
+
+    if (u.team === UN) list = list.filter(g => !names.includes(S.assign[m][g.key]));
+    else if (u.team !== 'all') list = list.filter(g => S.assign[m][g.key] === u.team);
+    if (u.sort === 'banyak') list.sort((a, b) => b.items.length - a.items.length);
+
+    $('#grp-' + m).innerHTML = list.length ? list.map(g => {
+      const info = dayOf.get(g.key);
+      const cur = S.assign[m][g.key] || '';
+      const pend = g.items.filter(({w}) => !isDone(w, m)).length;
+      return `<div class="grp">
+        <div class="gh">
+          <div>
+            <div class="gaddr">${esc(g.alamat)}</div>
+            <div class="gmeta">${g.items.length} WP · ${pend} belum selesai${cur ? ' · ' + esc(cur) : ''}</div>
+          </div>
+          <div class="ghright">
+            ${info ? `<span class="pill">Hari ${info.day}</span>` : '<span class="pill ok">Selesai</span>'}
+            <select class="no-print" data-act="assign" data-m="${m}" data-key="${esc(g.key)}">
+              <option value="">— Belum dibagi —</option>
+              ${names.map(n => `<option value="${esc(n)}" ${cur === n ? 'selected' : ''}>${esc(n)}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th class="c">Selesai</th><th>Nama WP</th><th>Jenis</th><th>Device ID</th><th>Jenis Alat</th><th>Metode</th><th class="no-print">Edit</th></tr></thead>
+          <tbody>${g.items.map(({w, i}) => `<tr class="${isDone(w, m) ? 'dn' : ''}">
+            <td class="c"><input type="checkbox" data-act="done" data-m="${m}" data-i="${i}" ${isDone(w, m) ? 'checked' : ''}></td>
+            <td>${esc(w.nama)}</td><td>${esc(w.jenis)}</td><td>${esc(w.device)}</td><td>${esc(w.alat)}</td><td>${esc(w.metode)}</td>
+            <td class="no-print"><button class="sm" data-act="edit" data-i="${i}">Edit</button></td></tr>`).join('')}
+          </tbody></table></div>
+      </div>`;
+    }).join('') : '<div class="empty">Belum ada WP. Tambahkan lewat tombol Tambah WP atau Import Excel.</div>';
+
+    $('#rec-' + m).innerHTML = sched.length ? `<div class="tw"><table>
+      <thead><tr><th>Tim</th><th class="num">Alamat</th><th class="num">WP</th><th class="num">Selesai</th><th class="num">Belum</th><th class="num">Hari</th><th>Perkiraan tanggal</th></tr></thead>
+      <tbody>${sched.map(b => `<tr>
+        <td><b>${esc(b.name)}</b></td><td class="num">${b.alamat}</td><td class="num">${b.total}</td>
+        <td class="num">${b.doneN}</td><td class="num">${b.pendN}</td><td class="num">${b.dayList.length}</td>
+        <td>${b.ds.length ? (b.ds[0].short + ' – ' + b.ds[b.ds.length - 1].short) : '—'}</td>
+      </tr>`).join('')}</tbody></table></div>`
+      : '<div class="empty">Belum ada data untuk dijadwalkan.</div>';
+
+    const rows = [];
+    sched.forEach(b => b.dayList.forEach((gs, i) => {
+      const n = gs.reduce((a, g) => a + g.items.length, 0);
+      rows.push(`<tr>
+        <td><b>${esc(b.name)}</b></td>
+        <td class="num">${i + 1}</td>
+        <td>${b.ds[i] ? b.ds[i].long : '—'}</td>
+        <td><div class="addrs">${gs.map(g => `<div class="ad">
+            <div class="adh"><span>${esc(g.alamat)}</span><span class="n">${g.items.length} WP</span></div>
+            <ul class="wpl">${g.items.map(({w}) => `<li>${esc(w.nama)}<span class="dv">${esc(w.device)}</span></li>`).join('')}</ul>
+          </div>`).join('')}</div></td>
+        <td class="num">${n}</td></tr>`);
+    }));
+    $('#sch-' + m).innerHTML = rows.length ? `<div class="tw"><table>
+      <thead><tr><th>Tim</th><th class="num">Hari</th><th>Tanggal</th><th>Target tempat (nama WP &amp; alamat)</th><th class="num">WP</th></tr></thead>
+      <tbody>${rows.join('')}</tbody></table></div>`
+      : '<div class="empty">Belum ada target tempat.</div>';
+  }
+
+  function secHTML(m){
+    return `<section class="card sec" data-sec="${m}">
+      <h2>${TITLES[m]}</h2>
+      <div class="plan no-print" id="plan-${m}" data-m="${S.plan[m].mode}">
+        <div class="seg">
+          <label><input type="radio" name="mode-${m}" value="tim" data-sec="${m}" data-f="mode"> Dari jumlah tim → hitung hari</label>
+          <label><input type="radio" name="mode-${m}" value="hari" data-sec="${m}" data-f="mode"> Dari target hari → hitung tim</label>
+        </div>
+        <div class="grid">
+          <label class="fld">Kapasitas WP per tim per hari<input type="number" min="1" data-sec="${m}" data-f="cap"></label>
+          <label class="fld" data-mode="hari">Target jumlah hari kerja<input type="number" min="1" data-sec="${m}" data-f="hari"></label>
+        </div>
+      </div>
+      <div class="chips no-print" id="ch-${m}"></div>
+      <div class="stats" id="st-${m}"></div>
+      <div class="toolbar no-print">
+        <input type="search" placeholder="Cari nama, alamat, device, alat, metode…" data-sec="${m}" data-ui="q">
+        <select data-sec="${m}" data-ui="filter"><option value="all">Semua WP</option><option value="todo">Belum selesai</option><option value="done">Selesai</option></select>
+        <select data-sec="${m}" data-ui="sort"><option value="alamat">Urutkan: urutan data</option><option value="banyak">Urutkan: WP terbanyak</option></select>
+      </div>
+      <div id="grp-${m}"></div>
+      <h2 style="margin-top:14px">Rekap per tim</h2>
+      <div id="rec-${m}"></div>
+      <h2 style="margin-top:14px">Target tempat &amp; jadwal per hari</h2>
+      <div id="sch-${m}"></div>
+    </section>`;
+  }
+
+  function fillInputs(){
+    MODES.forEach(m => {
+      const p = S.plan[m];
+      const r = document.querySelector(`input[name="mode-${m}"][value="${p.mode}"]`);
+      if (r) r.checked = true;
+      document.querySelector(`[data-sec="${m}"][data-f="cap"]`).value = p.cap;
+      document.querySelector(`[data-sec="${m}"][data-f="hari"]`).value = p.hari;
+      document.querySelector(`[data-sec="${m}"][data-ui="q"]`).value = S.ui[m].q;
+    });
+    $('#wilayah').value = S.wilayah;
+    $('#tanggal').value = S.tanggal;
+    $('#skip').checked = !!S.skip;
+    document.querySelectorAll('input[name=view]').forEach(r => r.checked = r.value === S.view);
+  }
+
+  const renderAll = () => MODES.forEach(renderSec);
+
+  function applyView(){
+    document.querySelectorAll('.sec').forEach(s => s.classList.toggle('active', s.dataset.sec === S.view));
+    renderSec(S.view);
+  }
+
+  function onField(e){
+    const t = e.target;
+    if (t.name === 'view') { if (t.checked) { S.view = t.value; applyView(); } return; }
+    if (t.dataset.act === 'assign') {
+      const m = t.dataset.m, k = t.dataset.key;
+      if (t.value) S.assign[m][k] = t.value; else delete S.assign[m][k];
+      renderSec(m); return;
+    }
+    if (t.dataset.sec && t.dataset.f) {
+      const m = t.dataset.sec;
+      if (t.type === 'radio') { if (!t.checked) return; S.plan[m].mode = t.value; }
+      else S.plan[m][t.dataset.f] = t.value;
+      renderSec(m); return;
+    }
+    if (t.dataset.sec && t.dataset.ui) { S.ui[t.dataset.sec][t.dataset.ui] = t.value; renderSec(t.dataset.sec); return; }
+    if (t.dataset.g) { S[t.dataset.g] = t.type === 'checkbox' ? t.checked : t.value; renderAll(); return; }
+    if (t.dataset.act === 'done') {
+      setDone(S.wp[+t.dataset.i], t.dataset.m, t.checked);
+      renderSec(t.dataset.m);
+    }
+  }
+  document.addEventListener('input', onField);
+  document.addEventListener('change', onField);
+
+  let E = -1;
+  const F = id => document.getElementById(id);
+  function openModal(i){
+    E = i;
+    const w = i >= 0 ? S.wp[i] : { nama:'', jenis:'Restoran', alamat:'', device:'', alat:'', metode:'' };
+    F('fNama').value = w.nama; F('fJenis').value = w.jenis; F('fAlamat').value = w.alamat;
+    F('fDevice').value = w.device; F('fAlat').value = w.alat; F('fMetode').value = w.metode;
+    F('mtitle').textContent = i >= 0 ? 'Edit WP' : 'Tambah WP';
+    F('mdel').hidden = i < 0;
+    F('modal').hidden = false;
+    F('fNama').focus();
+  }
+  function closeModal(){ F('modal').hidden = true; E = -1; }
+
+  let TM = 'pemasangan';
+  function openTeam(m){
+    TM = m;
+    F('tlist').value = teams(m).join('\n');
+    F('tmodal').hidden = false;
+    F('tlist').focus();
+  }
+  function closeTeam(){ F('tmodal').hidden = true; }
+
+  function autoAssign(m){
+    const names = teams(m);
+    if (!names.length) { alert('Tambahkan tim dulu lewat tombol Atur Tim.'); return; }
+    const groups = allGroups().slice().sort((a, b) => b.items.length - a.items.length);
+    const load = new Map(names.map(n => [n, 0]));
+    groups.forEach(g => {
+      let best = names[0];
+      names.forEach(n => { if (load.get(n) < load.get(best)) best = n; });
+      S.assign[m][g.key] = best;
+      load.set(best, load.get(best) + g.items.length);
+    });
+    renderSec(m);
+  }
+
+  document.addEventListener('click', e => {
+    const el = e.target.closest('[data-act]');
+    if (!el) return;
+    const act = el.dataset.act;
+    if (act === 'edit') { openModal(+el.dataset.i); return; }
+    if (act === 'team') { S.ui[el.dataset.m].team = el.dataset.team; renderSec(el.dataset.m); return; }
+    if (act === 'editteam') { openTeam(el.dataset.m); return; }
+    if (act === 'autoassign') { autoAssign(el.dataset.m); return; }
+  });
+
+  F('tcancel').addEventListener('click', closeTeam);
+  F('tmodal').addEventListener('click', e => { if (e.target.id === 'tmodal') closeTeam(); });
+  F('tsave').addEventListener('click', () => {
+    const list = F('tlist').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const uniq = [...new Set(list)];
+    S.plan[TM].teams = uniq;
+    const names = new Set(uniq);
+    Object.keys(S.assign[TM]).forEach(k => { if (!names.has(S.assign[TM][k])) delete S.assign[TM][k]; });
+    closeTeam();
+    renderSec(TM);
+  });
+
+  F('btnAdd').addEventListener('click', () => openModal(-1));
+  F('mcancel').addEventListener('click', closeModal);
+  F('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+  F('msave').addEventListener('click', () => {
+    const v = {
+      nama: F('fNama').value.trim(), jenis: F('fJenis').value.trim(), alamat: F('fAlamat').value.trim(),
+      device: F('fDevice').value.trim(), alat: F('fAlat').value.trim(), metode: F('fMetode').value.trim()
+    };
+    if (!v.nama || !v.alamat) { alert('Nama WP dan alamat wajib diisi.'); return; }
+    if (E >= 0) Object.assign(S.wp[E], v);
+    else S.wp.push({ ...v, dP:false, dM:false });
+    closeModal(); renderAll();
+  });
+  F('mdel').addEventListener('click', () => {
+    if (E >= 0 && confirm('Hapus WP ini dari daftar?')) { S.wp.splice(E, 1); closeModal(); renderAll(); }
+  });
+
+  // ----- RESET: daftar WP, wilayah, pembagian tim, dan centang dikosongkan -----
+  F('btnReset').addEventListener('click', () => {
+    if (!confirm('Reset semua data ke 0?\n\nDaftar WP (' + S.wp.length + ' WP), wilayah, pembagian tim, dan semua centang akan dikosongkan.\nTindakan ini tidak bisa dibatalkan — ekspor CSV dulu bila perlu.')) return;
+    S.wp = [];
+    S.wilayah = '';
+    S.assign.pemasangan = {};
+    S.assign.maintenance = {};
+    MODES.forEach(m => { S.ui[m] = { q:'', filter:'all', sort:'alamat', team:'all' }; });
+    fillInputs();
+    renderAll();
+  });
+
+  function needXLSX(){
+    if (typeof XLSX === 'undefined') { alert('Library Excel belum termuat. Periksa koneksi internet lalu muat ulang halaman.'); return false; }
+    return true;
+  }
+
+  F('btnTpl').addEventListener('click', () => {
+    if (!needXLSX()) return;
+    const wb = XLSX.utils.book_new();
+    const head = ['No', 'Nama WP', 'Jenis WP', 'Alamat', 'Device Id', 'Jenis Alat', 'Metode Tapping', 'Tim'];
+    const ex = [1, 'Contoh Kopi', 'Restoran', 'Jl. Contoh No.1, Soreang, Kabupaten Bandung', 'ASOR0001', 'Agent', 'Tapping Agent', 'Tim 1'];
+    const ws = XLSX.utils.aoa_to_sheet([head, ex]);
+    ws['!cols'] = [6, 28, 14, 50, 14, 14, 20, 12].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws, 'Data WP');
+    const info = [
+      ['Petunjuk Import Data WP'], [''],
+      ['1. Isi data mulai baris 2. Baris 1 adalah judul kolom, jangan diubah.'],
+      ['2. Kolom wajib: Nama WP dan Alamat. Baris tanpa keduanya dilewati.'],
+      ['3. Jenis WP contoh: Restoran, Hotel, Parkir, Hiburan.'],
+      ['4. Kolom Tim (opsional): isi Tim 1 / Tim 2 / Tim 3 untuk langsung membagi target alamat.'],
+      ['5. Alamat yang sama otomatis digabung jadi satu grup, walau beda WP.'],
+      ['6. Saat mode Tambah, Device Id yang sudah ada dilewati.'],
+      ['7. Hapus baris contoh sebelum import, lalu simpan file dan klik Import Excel.']
+    ];
+    const wi = XLSX.utils.aoa_to_sheet(info);
+    wi['!cols'] = [{ wch: 95 }];
+    XLSX.utils.book_append_sheet(wb, wi, 'Petunjuk');
+    XLSX.writeFile(wb, 'template-data-wp.xlsx');
+  });
+
+  let pending = null;
+  const im = { modal: F('imodal'), file: F('ifile'), msg: F('imsg'), ok: F('iok') };
+  const showMsg = (text, err) => { im.msg.textContent = text; im.msg.className = 'msg' + (err ? ' err' : ''); im.msg.hidden = false; };
+
+  function parseWorkbook(buf){
+    const wb = XLSX.read(buf, { type: 'array' });
+    for (const name of wb.SheetNames) {
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: '', raw: false });
+      const h = rows.findIndex(r => r.some(c => norm(c) === 'nama wp'));
+      if (h < 0) continue;
+      const hdr = rows[h].map(norm);
+      const idx = (...names) => hdr.findIndex(x => names.includes(x));
+      const map = {
+        nama: idx('nama wp', 'nama'), jenis: idx('jenis wp', 'jenis'), alamat: idx('alamat'),
+        device: idx('device id', 'device'), alat: idx('jenis alat', 'alat'),
+        metode: idx('metode tapping', 'metode'), tim: idx('tim', 'tim (opsional)')
+      };
+      if (map.alamat < 0) throw new Error('Kolom "Alamat" tidak ditemukan di sheet "' + name + '".');
+      const out = []; let skip = 0;
+      for (let i = h + 1; i < rows.length; i++) {
+        const r = rows[i];
+        const g = k => map[k] >= 0 ? String(r[map[k]] ?? '').trim() : '';
+        const v = { nama:g('nama'), jenis:g('jenis'), alamat:g('alamat'), device:g('device'), alat:g('alat'), metode:g('metode'), tim:g('tim') };
+        if (!v.nama && !v.alamat && !v.device) continue;
+        if (!v.nama || !v.alamat) { skip++; continue; }
+        out.push(v);
+      }
+      return { sheet: name, rows: out, skip };
+    }
+    throw new Error('Kolom "Nama WP" tidak ditemukan. Gunakan file dari Template Excel.');
+  }
+
+  function applyImportedTeams(rows, replace){
+    if (replace) { S.assign.pemasangan = {}; S.assign.maintenance = {}; }
+    let n = 0;
+    rows.forEach(r => {
+      const t = (r.tim || '').trim();
+      if (!t) return;
+      const k = keyOf(r.alamat);
+      MODES.forEach(m => {
+        if (!S.plan[m].teams.includes(t)) S.plan[m].teams.push(t);
+        S.assign[m][k] = t;
+      });
+      n++;
+    });
+    return n;
+  }
+
+  F('btnImport').addEventListener('click', () => {
+    if (!needXLSX()) return;
+    pending = null;
+    im.file.value = '';
+    im.ok.disabled = true;
+    im.msg.hidden = true;
+    im.modal.hidden = false;
+  });
+  F('icancel').addEventListener('click', () => { im.modal.hidden = true; pending = null; });
+  im.modal.addEventListener('click', e => { if (e.target.id === 'imodal') { im.modal.hidden = true; pending = null; } });
+
+  im.file.addEventListener('change', async () => {
+    pending = null; im.ok.disabled = true;
+    const f = im.file.files[0];
+    if (!f) { im.msg.hidden = true; return; }
+    try {
+      const res = parseWorkbook(await f.arrayBuffer());
+      pending = res;
+      const withTeam = res.rows.filter(r => r.tim).length;
+      showMsg(`Sheet "${res.sheet}": ${res.rows.length} WP siap diimport.`
+        + (res.skip ? `\n${res.skip} baris dilewati (Nama WP atau Alamat kosong).` : '')
+        + (withTeam ? `\n${withTeam} baris berisi kolom Tim dan akan langsung dibagi ke tim.` : ''));
+      im.ok.disabled = res.rows.length === 0;
+    } catch (err) {
+      showMsg(err.message || String(err), true);
+    }
+  });
+
+  im.ok.addEventListener('click', () => {
+    if (!pending) return;
+    const mode = document.querySelector('input[name="imode"]:checked').value;
+    const clean = pending.rows.map(r => ({ nama:r.nama, jenis:r.jenis, alamat:r.alamat, device:r.device, alat:r.alat, metode:r.metode }));
+    if (mode === 'replace') {
+      if (!confirm(`Ganti semua data (${S.wp.length} WP) dengan ${clean.length} WP dari Excel?`)) return;
+      S.wp = clean.map(v => ({ ...v, dP:false, dM:false }));
+      const nt = applyImportedTeams(pending.rows, true);
+      alert(`Import selesai: ${S.wp.length} WP.` + (nt ? ` ${nt} alamat sudah dibagi ke tim.` : ''));
+    } else {
+      const seen = new Set(S.wp.map(w => keyOf(w.device)).filter(Boolean));
+      let added = 0, dup = 0;
+      clean.forEach(v => {
+        const k = keyOf(v.device);
+        if (k && seen.has(k)) { dup++; return; }
+        if (k) seen.add(k);
+        S.wp.push({ ...v, dP:false, dM:false });
+        added++;
+      });
+      const nt = applyImportedTeams(pending.rows, false);
+      alert(`Import selesai: ${added} WP ditambahkan` + (dup ? `, ${dup} dilewati karena Device Id sudah ada.` : '.') + (nt ? ` ${nt} alamat dibagi ke tim.` : ''));
+    }
+    im.modal.hidden = true; pending = null;
+    renderAll();
+  });
+
+  function dl(content, name, type){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content], { type: type + ';charset=utf-8' }));
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  F('btnCsv').addEventListener('click', () => {
+    const m = S.view, sched = scheduleFor(m);
+    const info = new Map();
+    sched.forEach(b => b.dayList.forEach((gs, i) => gs.forEach(g => info.set(g.key, { day: i + 1, team: b.name }))));
+    const rows = [['Tim', 'Alamat', 'Hari', 'Tanggal', 'Nama WP', 'Jenis WP', 'Device ID', 'Jenis Alat', 'Metode', 'Status']];
+    allGroups().forEach(g => {
+      const it = info.get(g.key);
+      const team = S.assign[m][g.key] || '';
+      g.items.forEach(({ w }) => {
+        const done = isDone(w, m);
+        const b = it ? sched.find(x => x.name === it.team) : null;
+        rows.push([team, g.alamat, done ? '-' : (it ? it.day : '-'), done ? '-' : (b && b.ds[it.day - 1] ? b.ds[it.day - 1].long : '-'), w.nama, w.jenis, w.device, w.alat, w.metode, done ? 'Selesai' : 'Belum']);
+      });
+    });
+    const csv = '\ufeff' + rows.map(r => r.map(c => '"' + String(c ?? '').replace(/"/g, '""') + '"').join(';')).join('\r\n');
+    dl(csv, `grouping-wp-${m}-${slug(S.wilayah)}.csv`, 'text/csv');
+  });
+
+
+  // ----- DOWNLOAD EXCEL: Data Master + satu sheet jadwal per tim (format seragam, ada dropdown Status) -----
+  const XL = {
+    border: { top:{style:'thin',color:{argb:'FFCBD5E1'}}, left:{style:'thin',color:{argb:'FFCBD5E1'}}, bottom:{style:'thin',color:{argb:'FFCBD5E1'}}, right:{style:'thin',color:{argb:'FFCBD5E1'}} },
+    status: [['Selesai','FF166534','FFDCFCE7'], ['Proses','FF92400E','FFFEF3C7'], ['Belum','FF991B1B','FFFEE2E2'], ['Kendala','FF991B1B','FFFEE2E2']]
+  };
+  const XL_NOTE = 'Klik sel pada kolom Status (Kolom J) untuk memilih keterangan: Belum, Proses, Selesai, atau Kendala.';
+  const XL_FONT = (o) => Object.assign({ name:'Calibri', size:10, color:{ argb:'FF1E293B' } }, o || {});
+
+  function xlSheet(wb, name, title, headers, widths, rows, o){
+    const ws = wb.addWorksheet(name, {
+      views: [{ state:'frozen', ySplit:4 }],
+      pageSetup: { paperSize:9, orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0,
+        margins:{ left:0.75, right:0.75, top:1, bottom:1, header:0.5, footer:0.5 } }
+    });
+    widths.forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+    const NC = headers.length, solid = argb => ({ type:'pattern', pattern:'solid', fgColor:{ argb } });
+
+    ws.mergeCells(1, 1, 1, NC); ws.mergeCells(2, 1, 2, NC);
+    for (let c = 1; c <= NC; c++) { ws.getCell(1, c).fill = solid('FF1B365D'); ws.getCell(2, c).fill = solid('FF1B365D'); }
+    const t = ws.getCell(1, 1);
+    t.value = title; t.font = { name:'Calibri', size:14, bold:true, color:{ argb:'FFFFFFFF' } };
+    t.alignment = { horizontal:'left', vertical:'middle', indent:1 };
+    const n = ws.getCell(2, 1);
+    n.value = XL_NOTE; n.font = { name:'Calibri', size:10, color:{ argb:'FFE2E8F0' } };
+    n.alignment = { horizontal:'left', vertical:'middle', indent:1 };
+    ws.getRow(1).height = 27.95; ws.getRow(2).height = 18;
+
+    headers.forEach((hd, i) => {
+      const c = ws.getCell(4, i + 1);
+      c.value = hd; c.fill = solid('FF2B6CB0'); c.border = XL.border;
+      c.font = { name:'Calibri', size:10, bold:true, color:{ argb:'FFFFFFFF' } };
+      c.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
+    });
+    ws.getRow(4).height = 26.1;
+
+    rows.forEach((r, ri) => {
+      const rn = 5 + ri;
+      r.vals.forEach((v, ci) => {
+        const c = ws.getCell(rn, ci + 1);
+        c.value = (v === '' || v == null) ? null : v;
+        c.fill = solid(r.band ? 'FFF8FAFC' : 'FFFFFFFF');
+        c.border = XL.border;
+        c.font = XL_FONT({ bold: o.bold.includes(ci) });
+        c.alignment = o.left.includes(ci)
+          ? { horizontal:'left', vertical:'middle', wrapText:true }
+          : { horizontal:'center', vertical:'middle' };
+      });
+      ws.getRow(rn).height = o.rowH;
+    });
+
+    const last = 4 + rows.length;
+    ws.autoFilter = { from:{ row:4, column:1 }, to:{ row:last, column:NC } };
+    ws.dataValidations.add(`J5:J${last}`, {
+      type:'list', allowBlank:false, formulae:['"Belum,Proses,Selesai,Kendala"'],
+      promptTitle:'Pilih Status', prompt:'Pilih salah satu status: Belum, Proses, Selesai, atau Kendala'
+    });
+    ws.addConditionalFormatting({ ref:`J5:J${last}`, rules: XL.status.map(([val, fg, bg], i) => ({
+      type:'cellIs', operator:'equal', formulae:[`"${val}"`], priority:i + 1,
+      style:{ font:{ bold:true, color:{ argb:fg } }, fill:{ type:'pattern', pattern:'solid', fgColor:{ argb:bg }, bgColor:{ argb:bg } } }
+    })) });
+    return ws;
+  }
+
+  F('btnXlsx').addEventListener('click', async () => {
+    if (typeof ExcelJS === 'undefined') { alert('Library Excel belum termuat. Periksa koneksi internet lalu muat ulang halaman.'); return; }
+    if (!S.wp.length) { alert('Belum ada data WP untuk diunduh.'); return; }
+    const m = S.view, sched = scheduleFor(m);
+    const label = m === 'maintenance' ? 'Maintenance' : 'Pemasangan';
+
+    // baris terjadwal per tim (urutan: tim → hari → alamat → WP)
+    const pend = [];
+    sched.forEach((b, bi) => b.dayList.forEach((gs, di) => gs.forEach(g => g.items.forEach(({ w }) => {
+      pend.push({ bi, day: di + 1, team: b.name, tgl: b.ds[di] ? b.ds[di].long : '-', alamat: g.alamat, w, seq: pend.length });
+    }))));
+
+    // warna selang-seling Data Master mengikuti urutan hari → tim (sama seperti file contoh)
+    [...pend].sort((a, b) => a.day - b.day || a.bi - b.bi || a.seq - b.seq).forEach((r, i) => { r.band = i % 2 === 1; });
+
+    const noTeam = sched.length === 1 && sched[0].name === 'Semua tim';
+    const done = [];
+    allGroups().forEach(g => g.items.forEach(({ w }) => {
+      if (isDone(w, m)) done.push({ team: noTeam ? 'Semua tim' : (S.assign[m][g.key] || 'Belum dibagi'), day:'-', tgl:'-', alamat: g.alamat, w, status:'Selesai' });
+    }));
+    done.forEach((r, i) => { r.band = (pend.length + i) % 2 === 1; });
+
+    const master = pend.slice().sort((a, b) => a.bi - b.bi || a.day - b.day || a.seq - b.seq).concat(done);
+    if (!master.length) { alert('Tidak ada data untuk diunduh.'); return; }
+
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'Grouping WP';
+
+    const wil = (S.wilayah || '').trim();
+    xlSheet(wb, 'Data Master',
+      `DATA MASTER GROUPING ${label.toUpperCase()} WP${wil ? ' — ' + wil.toUpperCase() : ''}`,
+      ['Tim', 'Alamat', 'Hari', 'Tanggal', 'Nama WP', 'Jenis WP', 'Device ID', 'Jenis Alat', 'Metode', 'Status', 'Catatan Lapangan'],
+      [10, 52, 8, 18, 36, 16, 14, 14, 14, 14, 26],
+      master.map(r => ({ band: r.band, vals: [r.team, r.alamat, r.day, r.tgl, r.w.nama, r.w.jenis, r.w.device, r.w.alat, r.w.metode, r.status || 'Belum', ''] })),
+      { bold:[0, 4, 6], left:[1, 4, 10], rowH:27.95 });
+
+    const used = new Set(['Data Master']);
+    sched.forEach((b, bi) => {
+      const mine = pend.filter(r => r.bi === bi);
+      if (!mine.length) return;
+      let nm = ('Jadwal ' + b.name).replace(/[\\\/\?\*\[\]:]/g, ' ').slice(0, 31).trim(), k = 2;
+      while (used.has(nm.toLowerCase()) || used.has(nm)) nm = nm.slice(0, 28) + ' ' + (k++);
+      used.add(nm);
+      xlSheet(wb, nm,
+        `JADWAL OPERASIONAL LAPANGAN — ${b.name.toUpperCase()} (${mine.length} WAJIB PAJAK)`,
+        ['No', 'Hari', 'Tanggal', 'Nama WP', 'Alamat Lengkap', 'Jenis WP', 'Device ID', 'Jenis Alat', 'Metode', 'Status', 'Catatan Lapangan'],
+        [6, 8, 18, 36, 52, 16, 14, 14, 14, 14, 26],
+        mine.map((r, i) => ({ band: i % 2 === 1, vals: [i + 1, r.day, r.tgl, r.w.nama, r.alamat, r.w.jenis, r.w.device, r.w.alat, r.w.metode, 'Belum', ''] })),
+        { bold:[0, 3, 6], left:[3, 4, 10], rowH:30 });
+    });
+
+    // nama file: Jadwal_Maintenance_Kab_Semarang_Des_2026.xlsx
+    const wp = (wil.replace(/^kabupaten\b/i, 'Kab').replace(/[^\p{L}\p{N}]+/gu, '_').replace(/^_|_$/g, '')) || 'Wilayah';
+    let per = '';
+    if (S.tanggal) {
+      const d = new Date(S.tanggal + 'T00:00:00');
+      if (!isNaN(d)) per = '_' + d.toLocaleDateString('id-ID', { month:'short' }).replace(/\./g, '') + '_' + d.getFullYear();
+    }
+    const buf = await wb.xlsx.writeBuffer();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    a.download = `Jadwal_${label}_${wp}${per}.xlsx`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  });
+
+  F('btnSave').addEventListener('click', () => {
+    const data = {
+      wilayah: S.wilayah, tanggal: S.tanggal, skip: S.skip, view: S.view,
+      plan: S.plan, assign: S.assign,
+      rows: S.wp.map(w => [w.nama, w.jenis, w.alamat, w.device, w.alat, w.metode, w.dP ? 1 : 0, w.dM ? 1 : 0])
+    };
+    F('store').textContent = JSON.stringify(data).replace(/</g, '\\u003c');
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    dl(html, `grouping-wp-${slug(S.wilayah || 'kosong')}.html`, 'text/html');
+  });
+
+  F('btnPrint').addEventListener('click', () => window.print());
+
+  $('#secs').innerHTML = MODES.map(secHTML).join('');
+  fillInputs();
+  applyView();
+})();
+</script>
+
+</body></html>
